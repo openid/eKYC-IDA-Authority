@@ -1,10 +1,40 @@
 # Delegated Authorization Reference Architecture
 
-**Working draft v3.0 — Relationship, Authority, Objective, Obligations, and Constraints**
+**Working draft v4.2 — Relationship, Authority, Objective, Obligations, and Constraints**
 
 *A framework for expressing delegated authorization across human, organizational, and AI workload contexts, building on IETF and OpenID Foundation specifications.*
 
 *This file replaces the prior `reference_architecture_v1.1.md`. Going forward, the version is carried in this document header and in the per-revision changelog below; the filename is stable across revisions.*
+
+**Changelog (v4.1 → v4.2):**
+- **New §11.7.1 — a worked candidate direction for the precedence question: PIP-mediated discovery at the decision point.** Where a deployment already runs a Permissioned Capabilities PDP (§11.1), the governing instruments a verifier was not handed can be retrieved at decision time by a Policy Information Point and applied as decision inputs. Recorded as the **mechanism candidate directions (a) and (b) were missing** rather than a fifth alternative, with the Mission suite's Dual-Axis intersection named as precedent for the shape (a fact retrieved at the point of use, carrying its own staleness bound and failing closed with a distinct denial reason).
+- **Five limits stated, because they determine what still has to be specified:** it supplies the mechanism and not the obligation (an establishment-layer "an instrument exists" signal is still required — but can be much smaller than the instrument itself); a PIP supplies inputs and not precedence, and **§11.3's ordering does not discriminate between two holders at the same tier**, which is the motivating case; it is a deployment-profile answer, since an L0 or simple agentic deployment may have no PDP; an unreachable PIP MUST fail closed, and **"none — bounded by lifetime" (§8.3.1) stops being an available status mechanism** for profiles relying on it; and the retrieved value must be **authenticated governance state**, which implies a signed instrument with an identified issuer — so PIP mediation creates demand for an establishment layer rather than avoiding one.
+- **Privacy constraint on PDP placement recorded and cross-referenced.** The retrieval is a disclosure channel in its own right — through the response, and through the query pattern even when the response is a bare boolean — so under the Privacy-Preserving Profile, PDP placement is load-bearing. Points at the profile's new §3.6.
+- **Version:** additive, confined to §11 (open questions). No component, claim, wire shape, or normative rule changed; nothing is adopted and no previously-conformant deployment is affected → **minor** bump (v4.2).
+- **Source:** design discussion following `stress-tests/guardianship_authority_fieldwork.md`; the PIP framing is George Fletcher's.
+
+**Changelog (v4.0 → v4.1):**
+- **§11.7 reframed — "Disputes, Appeals, and Override Mechanisms" becomes "Precedence Among Concurrent Authority Holders."** The section previously treated the subject as a deferred *dispute protocol* operating at the execution layer, after a decision. Guardianship fieldwork (§13, O'Connell & Curtis, September 2026) shows the common case is the opposite: a **precedence rule fixed at establishment time and known in advance**. Under a shared care order, a birth parent's residual parental responsibility, a local authority's statutory parental responsibility, and a carer's delegated day-to-day authority are **simultaneously live over one subject with non-nested scopes**, alongside a **standing override held by a party outside the carer's chain** (a social worker, a Director of Alternative Care) or, where responsibility is fully transferred, by a *process* (a court order). The reframed section names the three properties the model lacks — concurrency, precedence between separate delegations (distinct from §11.3's conflict rule *within* one), and, most consequentially, **discoverability**: nothing obliges a verifier to look for instruments it was not handed, so a correctly-validated Authority can be honoured in full conformance while a governing override sits unconsulted. It records the same defect seen from the Constraints side (a care plan is **subject-scoped**; Constraints as specified are **delegation-scoped**, expressible only as a Tier 2 `policy_ref` every issuer is trusted to consult), lists four candidate directions with **none adopted**, and names the interactions any resolution must preserve (§11.6, §8.2/§12.2 role-scoped anchors, §3.2 conformance level). The dispute-and-appeal question is **retained as a sub-question**, not discarded.
+- **§11.6 and §11.8 refreshed (editorial within this revision).** §11.6's multi-decision-tier quorum is now **evidenced rather than hypothesised** — the routine/strategic split is in operational use, varies by the type of the governing order, and is not independent of §11.7. §11.8's cross-border disposition is unchanged, but no longer reads as though the landscape were blank: the 1996 Hague Convention and the March 2026 EU position on cross-border recognition of protective measures and powers of representation are named as working models a trust framework operator can map onto.
+- **§13.2 gains three informative references** — both O'Connell & Curtis documents (April 2026 policy framework; September 2026 fieldwork) and the 1996 Hague Convention.
+- **Version:** additive and confined to §11 (open questions) and §13 (references). **No component, claim, wire shape, or normative rule changed, and no previously-conformant deployment is made non-conformant** → **minor** bump (v4.1). The reframe changes what the specification says is *unresolved*, not what it requires.
+- **Source:** `stress-tests/guardianship_authority_fieldwork.md` §3.1 and §7. Two open questions the fieldwork raises are recorded framework-side rather than here (`memory/PROJECT_MEMORY.md` §10.2): precedence among concurrent holders, and **provisional establishment pending ratification** (the Emergency Protection Order pattern — valid and enforceable now, most-restrictive by default, lapsing if not ratified at the first formal review).
+
+**Changelog (v3.1 → v4.0):**
+- **New §3.2 — Conformance Levels and Deployment Profiles (two axes).** The specification presented its component decomposition as a single flat structure, so a reader met all of it as the price of entry regardless of whether their deployment needed any of it. §3.2 states two **independent** axes and the rule that they are never collapsed: **Axis 1, conformance level** (L0 Compact, one JWT / one issuer / one lifetime; L1 Separated establishment, binding chain load-bearing; L2 Distributed authorship, role-scoped trust anchors load-bearing) governs *packaging*; **Axis 2, deployment profile** (agentic, high-assurance, privacy-preserving) governs *assurance* and is unchanged.
+- **Level is a packaging choice, not a semantic one (normative).** Every claim in an L0 `delegation+jwt` is the same claim, with the same name and meaning, that it carries in its own component JWT. An L0 delegation MUST be mechanically expandable into the equivalent L1 form, and a single-issuer single-lifetime L1 delegation MUST be mechanically collapsible into L0. No claim, rule, or vocabulary is defined for only one level — this is the property that keeps the compact form from being a second model. §3.2.1 also states plainly what L0 gives up (no layered authorship; establishment facts re-issued per task).
+- **The axes interact only through a floor (§3.2.3).** A profile may set a minimum level where its requirements cannot be met by lesser packaging — agentic L0, high-assurance L1 (L2 where the granting body is not the Relationship issuer), privacy-preserving L2 — and nothing more. Artifact count measures distribution of authorship, not assurance.
+- **New §4.2.1 and §5.3.1 — Required Core and Extensions.** Relationship and Authority now state a minimal required core (Relationship: `typ`, `iss`/`iat`/`exp`/`jti`, `delegator`, `delegatee`, `rel_type`; Authority: `typ`, registered claims, and at least one of `source_authority`/`derivative_authority`) with everything else presented as named OPTIONAL extensions carrying the condition under which to include them. §4.2.1 also states that §4.3's relationship-type table is a **base registry, not a required vocabulary**, and that a verifier MUST reject an unrecognized `rel_type` rather than guess — which is what makes supporting a small subset safe.
+- **New §12.3.1 — Conformance-Level Downgrade (normative).** The levels differ in which integrity machinery is load-bearing, so accepting a lower level than the deployment requires is a **privilege escalation by repackaging**: an L0 delegation asserts on its single issuer's sole authority facts a higher floor requires a third party to have authored. A verifier MUST establish the required level from its own configured profile, never from the presented delegation, and MUST reject anything below its floor. The collapsibility rule's single-issuer/single-lifetime conditions are identified as load-bearing: collapsing a multi-issuer delegation would re-sign third-party evidence as self-assertion, so an implementation MUST NOT do it. General form: `typ` and issuer identity, not claim shape, carry the trust distinction.
+- **Applicability notes:** §8.1 now states that the binding chain applies at L1/L2 and is vacuous at L0 (the single signature already covers every component jointly), and §8.2 identifies its multi-issuer discipline as what defines L2. §2.5 and §5.6 gained cross-references to the new axis.
+- **Version:** §3.2 introduces a new packaging form (`typ: delegation+jwt`) and states normative expandability/collapsibility rules, and §4.2.1/§5.3.1 restate which fields are required — a structural change to how the components may be carried → **major** bump (v4.0). **No component was added, removed, or renamed, and no claim changed name or meaning**; a v3.1 delegation is a conformant v4.0 delegation at L1 or L2.
+- **Source:** OpenID Foundation eKYC & IDA Working Group review of RA v3.0 — `openid/eKYC-IDA-Authority` issue #6 (R. Grimstad), points 1–3 (combine into a single JWT; specify only what is always necessary; remove informational properties). Analysis: `external-analysis/oidf_ekyc_ida_wg_feedback_analysis.md`. **Point 3 was deliberately not implemented as asked:** inert-but-committed evidence (`constraint_provenance` §7.5, the Objective §9, advisory `scope_domain` §5.5.1) is load-bearing for accountability and is made *profile-conditional* by this revision rather than removed; see the analysis §1.3 for the decoration-versus-inert-evidence distinction.
+
+**Changelog (v3.0 → v3.1):**
+- **New §8.3.1 — Choosing a Status Mechanism (profile property).** §8.3 established the commit-boundary *principle* and made the status signal a per-component property, but never stated the menu of mechanisms or blessed the null case; the section read as prescribing a revocation endpoint even though its own text used MAY and already admitted status lists and transparency receipts. §8.3.1 states the mechanism menu explicitly, adds **OAuth 2.0 Token Introspection [RFC 7662]** for deployments already presenting components by reference, and makes **"none — bounded by lifetime" a conformant profile choice** where the profile states the choice and records the risk acceptance. It also states where the null mechanism does **not** suffice: the four change classes that open §8.3 arrive between issuance and action from a party other than the issuer, so no usable lifetime bounds them, and profiles admitting those cases (high-assurance §5.6, the Privacy-Preserving Profile) constrain the choice. Cites the Mission suite's Baseline vs. Runtime-Enforced containment properties as precedent for expressing this as a declared property rather than a mandate with exceptions.
+- **§8.3 "Per-component status signals" reworded** to name the menu, point at §8.3.1, and frame a component with no status reference as a profile choice rather than an omission ("permitted but signals to operators…" → "§8.3.1 makes that a conformant profile choice").
+- **Version:** additive — a new sub-section and one new optional mechanism; no component added or removed, no JWT wire shape changed, and no previously-conformant deployment made non-conformant → **minor** bump (v3.1). The commit-boundary principle itself is unchanged and remains non-optional; only the mechanism was ever a profile choice, and now says so.
+- **Source:** OpenID Foundation eKYC & IDA Working Group review of RA v3.0 — `openid/eKYC-IDA-Authority` issue #6 (R. Grimstad), point 4. Analysis: `external-analysis/oidf_ekyc_ida_wg_feedback_analysis.md`. The issue's other three points are answered by the progressive-complexity ladder, tracked separately (`memory/PROJECT_MEMORY.md` §10.2) and not addressed in this revision.
 
 **Changelog (v2.5 → v3.0):**
 - **`scope_override` removed; graduated authority re-based onto the Authority issuer (resolves review finding M1).** §4.8 previously let a stage in the *Relationship* (`eligibility.tier1.stage_schedule[].scope_override`) designate "the operative scope," overriding the Authority's `scope_domain`. This **inverted the component layering** (a Relationship-side field moving Authority scope) and, under multi-issuer signing (§8.2), let the Relationship issuer override the Authority issuer's scope — a cross-issuer escalation the role-scoped-anchor rule (§12.2) forbids. It was also left incoherent by v2.4, which made `scope_domain` advisory while §4.8 still treated `scope_override` as an enforcement lever. **§4.8 is rewritten** to separate the two things a graduated delegation moves and keep each on its owning instrument: **eligibility** (who/when) stays on the Relationship's `stage_schedule` (now carrying a descriptive `capacity_band`, never scope); **scope** (what) is carried only on the **Authority** — the normative baseline is a **sequence of Authority JWTs** (one per band, issued by the Authority issuer), with an **optional Authority-side `stage_schedule`** mapping each band to **admitted RAR types** (value-space, §5.5.1) as a compact encoding that avoids per-stage re-issuance. Because life-stage bands are not in general nested subsets, a graduated chain cannot be expressed as a narrowing Constraint; the fresh-Authority-per-band model is what admits non-nested successive scopes. §5.5.1, §12.2, §12.5, and §12.6 updated to reflect that the cross-issuer `scope_override` path is closed with no residual open instance.
@@ -167,7 +197,7 @@ Delegators and delegatees may be groups, not just individuals. Three group model
 
 ### 2.5 Profile-based assurance
 
-Different deployment contexts have different assurance requirements. Healthcare and legal contexts demand verified-claims envelopes, trust-framework attestation, and notarized authority instruments. Agentic AI contexts need lightweight, high-velocity delegation. The framework supports both through deployment profiles that determine which fields are required versus optional.
+Different deployment contexts have different assurance requirements. Healthcare and legal contexts demand verified-claims envelopes, trust-framework attestation, and notarized authority instruments. Agentic AI contexts need lightweight, high-velocity delegation. The framework supports both through deployment profiles that determine which fields are required versus optional. Assurance is one of two independent axes: §3.2 states the second — the **conformance level**, which governs how the delegation is packaged — and the rule that the two are never collapsed.
 
 ### 2.6 Two-tier policy expression
 
@@ -262,6 +292,76 @@ A Task JWT MAY additionally carry an Objective (§9), inline or by reference, de
 
 ---
 
+### 3.2 Conformance Levels and Deployment Profiles (two axes)
+
+The component decomposition above is what a delegation needs when its facts have **different authors and different lifetimes**. Many delegations do not. A person authorizing their own agent to book travel is one party, issuing one instrument, whose establishment facts change exactly as often as the tasks do. Presenting that deployment with three artifacts and a binding chain imposes structure that is buying nothing.
+
+This specification therefore describes two **independent** axes. They are stated separately and MUST NOT be collapsed into a single ladder: one governs *how the delegation is packaged*, the other governs *how much assurance its contents carry*.
+
+#### 3.2.1 Axis 1 — Conformance level (packaging)
+
+| Level | Packaging | Binding | What makes it necessary |
+|---|---|---|---|
+| **L0 — Compact** | One JWT (`typ: delegation+jwt`) carrying all components as claims | None; co-location is the binding | One issuer, one lifetime |
+| **L1 — Separated establishment** | Relationship and/or Authority issued as their own JWTs | Binding chain (§8.1) via `rel_jti`/`rel_hash`, `auth_jti`/`auth_hash` | One establishment underwrites many Tasks |
+| **L2 — Distributed authorship** | Components issued by different issuers | Binding chain **plus** role-scoped trust anchors (§8.2) | The facts have different authors |
+
+A verifier declares the highest level it implements and MUST accept every level below it: the levels are cumulative, and an L2 verifier is by construction able to evaluate an L0 delegation.
+
+**Level is a packaging choice, not a semantic one.** This is the property that keeps L0 from being a second model. Every claim in a `delegation+jwt` is *the same claim, with the same name and the same meaning*, that it would carry in its own component JWT. An L0 delegation MUST be mechanically expandable into the equivalent L1 form by lifting each component's claims into a component JWT issued by the same issuer with the same validity window — and an L1 delegation whose components share one issuer and one validity window MUST be mechanically collapsible into the equivalent L0 form. No claim, rule, or vocabulary in this specification is defined only for one level. What the levels change is which *integrity* machinery is load-bearing: at L0 the single signature covers everything, so the binding chain has nothing to do; at L1 the chain carries the load; at L2 the chain plus per-issuer, role-scoped trust anchors carry it.
+
+**What L0 gives up, stated plainly.** A compact delegation cannot express layered authorship — no constraint whose author differs from the delegation's issuer (§7.5), no authority whose granting body is a third party (§5.4), no relationship established by one party and exercised under another's credentialing. It also re-issues the establishment facts on every task, so revoking an establishment fact means revoking every outstanding delegation that carried it. These are not defects of L0; they are the conditions under which L0 is the right choice.
+
+**Example: the agentic case at L0.** The same delegation as §5.7 and §10.1 — Bob authorizing his AI travel agent — packaged compactly. One issuer (Bob's wallet), one lifetime, no distributed authorship:
+
+```json
+{
+  "typ": "delegation+jwt",
+  "iss": "https://wallet.bob.example",
+  "iat": 1714000000,
+  "exp": 1714003600,
+  "jti": "urn:uuid:2f7c9a10-4b8e-4d3f-9a15-7c0e2b6d8f31",
+  "relationship": {
+    "rel_type": "urn:ietf:params:delegation:principal-agent",
+    "delegator": { "fmt": "oidc", "iss": "https://idp.example", "sub": "bob-3391" },
+    "delegatee": { "fmt": "spiffe", "id": "spiffe://agents.example/travel-agent/7f2c" }
+  },
+  "authority": {
+    "derivative_authority": {
+      "permission": {
+        "scope_domain": "https://schemas.example.com/scope/travel"
+      }
+    }
+  },
+  "objective": {
+    "action": "book-business-trip",
+    "purpose": { "kind": "travel", "display": "Book the Berlin trip, 12-15 May" }
+  },
+  "obligations": { "composition_logic": "all", "items": [ "..." ] },
+  "constraints": { "tier1": { "max_amount": { "value": 2400, "currency": "EUR" } } }
+}
+```
+
+Every claim under `relationship`, `authority`, `objective`, `obligations`, and `constraints` is the same claim, with the same meaning, that §4 through §9 define for the corresponding component JWT. There is no `rel_jti`/`rel_hash` pair because there is no separate Relationship to point at; the single signature over the whole object is the binding. There is no status reference because this profile's declared mechanism is "none — bounded by lifetime" (§8.3.1), which the one-hour `exp` is chosen to make defensible.
+
+#### 3.2.2 Axis 2 — Deployment profile (assurance)
+
+The deployment profiles are unchanged by this section: the **agentic** and **high-assurance** profiles (§5.6) and the layered **Privacy-Preserving Profile** (companion document). A profile determines which fields are required versus optional and what evidence must accompany them — §2.5's principle.
+
+#### 3.2.3 How the axes interact
+
+A profile does not fix a level, and a level does not imply a profile. What a profile MAY do is set a **floor** on the level, where its own requirements cannot be met by a lesser packaging:
+
+| Profile | Minimum level | Why the floor exists |
+|---|---|---|
+| Agentic | **L0** | Self-authority and first-party agent delegation need no distributed authorship |
+| High-assurance | **L1**, and **L2** wherever the credentialing body is not also the Relationship issuer | `source_authority.granting_body` (§5.4) and the `verified_claims` envelope name evidence a third party authored |
+| Privacy-preserving | **L2** | The verification intermediary (companion profile) is a distinct role by construction, so authorship is distributed by definition |
+
+The floors are the only coupling. Above its floor a deployment chooses freely: an agentic deployment that wants one long-lived Relationship underwriting many Tasks runs agentic-at-L1 (§9.5's household-renewals case), and nothing about that raises its assurance requirements.
+
+**Why the axes are kept separate.** Collapsing them would make "compact" read as "low-assurance," which is false in both directions: a compact delegation may carry a `verified_claims` envelope and demand strong authentication, while a three-artifact delegation issued entirely by one party carries no more evidential weight than the same facts co-located. Artifact count measures distribution of authorship. It does not measure assurance. The Mission-Bound Authorization suite reaches the same conclusion from the runtime side and keeps its conformance properties and its assurance levels explicitly uncollapsed (§13).
+
 ## 4. Relationship
 
 ### 4.1 Purpose
@@ -277,6 +377,33 @@ A Relationship JWT contains five logical sections:
 3. **Relationship metadata** — `rel_type`, `rel_version`, `rel_status`, `rev_endpoint`
 4. **Party identity** — polymorphic `delegator` and `delegatee` objects, each optionally carrying a group descriptor
 5. **Eligibility criteria** — two-tier: typed predicates (`tier1`) and/or policy reference (`tier2`)
+
+#### 4.2.1 Required Core and Extensions
+
+Most of what follows in this section is an **extension**: machinery for cases that need it, not a cost every deployment pays. A conformant Relationship carries the required core and nothing else unless its deployment profile or its own facts call for more.
+
+**Required core** — every Relationship, at every conformance level (§3.2), carries:
+
+| Claim | Why it is required |
+|---|---|
+| `typ: "relationship+jwt"` (or the enclosing `delegation+jwt` at L0) | Type confusion between components is a forgery primitive (§12) |
+| `iss`, `iat`, `exp`, `jti` | Issuer, validity window, and the identifier the binding chain and status signals key on |
+| `delegator`, `delegatee` | The relation is undefined without both parties |
+| `rel_type` | A verifier cannot apply the right rules without knowing what kind of relation it is holding |
+
+**Extensions** — each is OPTIONAL in the base specification, and a deployment omits it unless the row's condition holds:
+
+| Extension | Section | Include it when |
+|---|---|---|
+| `rel_version`, `rel_status` | §4.2 | The deployment revises Relationships in place, or exposes state beyond `exp` |
+| `rev_endpoint` or another status reference | §8.3.1 | The profile's status mechanism is not "none — bounded by lifetime" |
+| Group descriptor (`group`) | §4.5 | A party is a group rather than a single identity, or quorum applies |
+| Tier 1 eligibility predicates | §4.6 | Who may act is narrower than "the named delegatee" |
+| Tier 2 policy reference | §4.6 | Eligibility needs expressivity the typed vocabulary does not reach |
+| Graduated authority (`stage_schedule`) | §4.8 | Eligibility changes over the life of the relationship on a schedule known at issuance |
+| Role-tuple groups | §4.9 | Membership is defined by a role tuple rather than enumerated identities |
+
+**On the `rel_type` registry.** The table in §4.3 is a *base registry*, not a required vocabulary. A deployment supports the subset its ecosystem uses and registers its own types under its own namespace; a verifier encountering a `rel_type` it does not recognize MUST reject the Relationship rather than guess, which is what makes a small supported subset safe to deploy.
 
 ### 4.3 Relationship Types
 
@@ -520,6 +647,23 @@ An Authority JWT contains:
 
 At least one of `source_authority` or `derivative_authority` MUST be present.
 
+#### 5.3.1 Required Core and Extensions
+
+**Required core** — every Authority carries `typ: "authority+jwt"` (or the enclosing `delegation+jwt` at L0), the registered claims (`iss`, `iat`, `exp`, `jti`), and at least one of `source_authority` or `derivative_authority`.
+
+**Extensions:**
+
+| Extension | Section | Include it when |
+|---|---|---|
+| Relationship binding (`rel_jti`, `rel_hash`) | §8.1 | Conformance level is L1 or L2 — at L0 there is no separate Relationship to bind to |
+| `verified_claims` envelope | §5.3 | The high-assurance profile applies (§5.6), where it is REQUIRED |
+| `source_authority` | §5.4 | The delegator's right to delegate rests on an instrument rather than on self-authority; REQUIRED in the high-assurance profile |
+| `derivative_authority.further_delegation` | §5.5 | Onward delegation is permitted; its absence means onward delegation is not authorized |
+| `prior_authority_ref` | §5.5 | The authority continues a chain and the summary-level link is needed |
+| `rev_endpoint` or another status reference | §8.3.1 | The profile's status mechanism is not "none — bounded by lifetime" |
+
+The minimal agentic Authority is therefore a `derivative_authority` naming a scope domain, with no source authority (omission implies inherent self-authority, §5.6) and no further-delegation grant — three claims plus the registered set.
+
 ### 5.4 Source Authority
 
 The source authority section follows the OpenID Authority structure:
@@ -557,12 +701,15 @@ Two reference profiles are defined:
 - `source_authority` REQUIRED
 - `granted_by.method` SHOULD NOT be `inherent`
 - `granted_by.granting_body` REQUIRED
+- Minimum conformance level **L1**, and **L2** wherever `granting_body` is not also the Relationship issuer (§3.2.3)
+- Status mechanism MUST NOT be "none — bounded by lifetime" (§8.3.1)
 
 **Agentic profile** (AI workload delegation, consumer self-delegation)
 - `verified_claims` envelope OPTIONAL
 - `source_authority` OPTIONAL (omission implies inherent self-authority)
 - `derivative_authority` REQUIRED
 - All `granted_by.method` values permitted
+- Minimum conformance level **L0** (§3.2.3); any level above it is a deployment choice and does not change the profile's requirements
 
 ### 5.7 Example A: Agentic — Bob → AI Travel Agent
 
@@ -930,6 +1077,8 @@ Privacy note: the `event_type` and `event_source` fields are inherently revealin
 
 ### 8.1 Binding Chain
 
+**Applicability.** This section applies at conformance levels **L1 and L2** (§3.2.1). At L0 the components are claims of a single signed object, so the issuer's signature already covers every component jointly and the chain has nothing left to establish; an L0 verifier performs no binding-chain steps, and their absence is conformant rather than a skipped check. The rest of this section assumes components issued as separate JWTs.
+
 The components form an integrity chain through hash references. The Objective (§9), when present, participates in the chain for integrity only:
 
 ```
@@ -974,7 +1123,7 @@ Steps 1–5 and 8's integrity checks are cryptographic and may be cached for the
 
 ### 8.2 Issuer Identity and Profile-Dependent Signing
 
-The signing model for each JWT is profile-dependent and intentionally left out of scope for the base specification. Deployment profiles MAY require:
+The signing model for each JWT is profile-dependent and intentionally left out of scope for the base specification. Single-issuer signing is the L0 and typical L1 case; the multi-issuer discipline below is what defines conformance level **L2** (§3.2.1). Deployment profiles MAY require:
 
 - Single-issuer signing (delegator signs all components)
 - Multi-issuer signing (Relationship signed by an identity federation, Authority by a credentialing body, Task by the delegator)
@@ -995,11 +1144,29 @@ The architectural principle of this specification is that **each component indep
 
 Three properties follow from this principle:
 
-**Per-component status signals.** Relationship, Authority, and Task JWTs each MAY carry a `rev_endpoint` claim (or, in deployment profiles that prefer them, an equivalent status reference such as a status list URL or a transparency-service receipt). The status signal is the component's own — the Relationship's `rev_endpoint` is consulted for the Relationship's liveness, not for the Authority's. The cascade rules in §8.4 then compose these per-component signals into the overall delegation's validity. A component without a `rev_endpoint` is treated as having no in-flight liveness signal beyond its own `exp` and the cascade from its upstream components; this is permitted but signals to operators that no run-time state change can independently invalidate that component.
+**Per-component status signals.** Relationship, Authority, and Task JWTs each MAY carry a `rev_endpoint` claim, or, in deployment profiles that prefer them, an equivalent status reference — a status list URL, a transparency-service receipt, or an OAuth 2.0 Token Introspection endpoint [RFC 7662] where the component is presented by reference rather than by value. This specification does not mandate a mechanism; §8.3.1 states the menu and the rule for choosing among them. The status signal is the component's own — the Relationship's `rev_endpoint` is consulted for the Relationship's liveness, not for the Authority's. The cascade rules in §8.4 then compose these per-component signals into the overall delegation's validity. A component carrying no status reference has no in-flight liveness signal beyond its own `exp` and the cascade from its upstream components; §8.3.1 makes that a conformant profile choice rather than an omission.
 
 **Commit-time, not issuance-time.** A verifier that checked status only at issuance and cached the result for the lifetime of the cryptographic binding would defeat the purpose of the status signal. Verifiers MUST consult the status signal at the moment of action, subject to the cache bounds the status response itself declares. For high-stakes profiles (life-safety, large-value financial signing, child-welfare safeguarding) the cache bounds are tight; for low-stakes profiles they may be looser. §8.4 specifies the maximum enforcement window.
 
 **Status signals beyond revocation.** Revocation — an explicit, issuer-signed assertion that a component is no longer valid — is the simplest status signal and is specified concretely in §8.4. The principle covers more than revocation. Trigger-based expiry (§7.7) is a status signal embedded in a Constraint that may fire without any action by the issuer. Tightening of Constraints by an external authority (regulatory body, court) is a status signal expressed as a layered overlay rather than as a revocation. Silent lapse of the underlying Authority (an employment ending, a credentialing body withdrawing a privilege) may be expressed either as a revocation event from the issuer or as an out-of-band status reference the verifier consults. Obligation discharge via `terminal_when` (§6.6) is a fourth instance: a status signal embedded in an Obligation item that fires when the task's inherent completion event occurs, independently of any constraint tightening or issuer revocation action. Discharge differs from the other instances in audit semantics — it signals task completion rather than task invalidity — but the verifier's commit-boundary obligation is identical: check the signal, and if it has fired, deny the request.
+
+#### 8.3.1 Choosing a Status Mechanism (profile property)
+
+The commit-boundary *principle* — that a verifier evaluates the delegation as it stands at the moment of action, not as it stood at issuance — is a property of this architecture. The *mechanism* by which a component's current state is learned is not: it is a **declared property of the deployment profile**, chosen from the following menu, and a profile MUST state which it uses for each component.
+
+| Mechanism | Verifier obtains state by | Suits |
+|---|---|---|
+| Revocation endpoint (`rev_endpoint`, §8.4) | Querying the issuer's status endpoint at commit time | Deployments needing per-component, issuer-authoritative liveness |
+| Status list | Fetching and checking a bit in a signed, cacheable list | High volume, where per-query cost dominates |
+| Transparency-service receipt | Verifying a receipt offline against published state | Deployments already operating a transparency service (see *Execution Layer* §3.8) |
+| Token introspection [RFC 7662] | Introspecting a reference token at the issuer | Deployments already presenting components by reference rather than by value |
+| **None — bounded by lifetime** | Not at all; the component's `exp` is the only bound | Short-lived components where the residual exposure is accepted |
+
+**The null mechanism is a conformant choice.** A profile MAY carry no status reference on a component and rely on a short `exp`, provided the profile **states the choice explicitly and records the risk acceptance**: the maximum interval during which a state change can be neither observed nor enforced is exactly that component's remaining lifetime. This is not a degraded mode. For high-velocity, low-consequence delegation — a first-party agent booking travel within a pre-authorized budget — a two-minute credential and no status infrastructure is a sound engineering answer, and demanding an endpoint per component would impose cost with no corresponding reduction in exposure.
+
+**Where the null mechanism does not suffice.** The four change classes that open §8.3 share a property that lifetime cannot address: the change arrives *between* issuance and action, from a party other than the issuer, and its whole significance is that it must take effect before the next act rather than at the next renewal. A court order narrowing a guardianship, an authority lapsing when a credentialing body withdraws a privilege, and an inherent self-authority ceasing at loss of capacity are all of this kind. For these, no lifetime short enough to bound the exposure is long enough to be operationally usable, and a profile governing them MUST carry a status signal on the affected components. Deployment profiles that admit such cases — the high-assurance profile (§5.6) and the Privacy-Preserving Profile — therefore constrain this choice rather than leaving it open.
+
+This is the same distinction the Mission-Bound Authorization suite draws between its two containment properties: *Baseline*, where a consumer that checks only expiry is fully conformant and exposure is bounded by token lifetime, and *Runtime-Enforced*, where an action-time check against observable state is required (§13). Naming it here as a profile property, rather than as a mandate with exceptions, keeps the architecture honest about which deployments actually need the infrastructure.
 
 Among the *obligation-level* signals, only `terminal_when` (§6.6) has a concrete observation mechanism specified in this version. The other obligation-level cases listed earlier in this section (the targeted resource no longer exists, an implicit precondition was invalidated, the act was already completed by another party) are illustrative of the commit-boundary principle rather than fully specified mechanisms; the means by which a verifier observes them is deliberately left to profiles and to the *Execution Layer*, and the principle should not be read as a claim that the base specification already defines how each is surfaced.
 
@@ -1290,13 +1457,56 @@ When a delegation chain crosses profile boundaries (e.g., a high-assurance medic
 
 Section 4.9 introduces role-tuple groups for consensus decisions. Extending this to support **multi-decision-tier quorum** (where routine decisions require one role, significant decisions require three, and strategic decisions require all named roles) is left to a future revision. The current Tier 2 policy_ref escape hatch can express this for deployments that need it.
 
-### 11.7 Disputes, Appeals, and Override Mechanisms
+As of v4.1 the requirement is **evidenced in practice rather than hypothesised**: guardianship fieldwork (§13, O'Connell & Curtis, September 2026) records the routine/strategic split operating today, and adds a second dimension — the tiering varies by the *type of the governing order*, not only by the decision. It also shows that this question is not independent of §11.7, since a threshold requiring agreement across several role-holders is itself a statement about precedence among them.
 
-Real-world delegations occasionally need to be disputed or appealed by the delegatee or by an affected third party (e.g., the data subject in a guardianship case). The base specification does not yet define a dispute protocol. This is closely related to the Permissioned Capabilities and Protected Access work, since disputes typically operate at the execution layer where capabilities are exercised.
+### 11.7 Precedence Among Concurrent Authority Holders
+
+*Reframed in v4.1. This section previously treated the subject as a deferred **dispute and appeal protocol** operating at the execution layer, after the fact. Fieldwork on guardianship authority (§13, O'Connell & Curtis, September 2026) shows that framing is too narrow: the common case is not a dispute raised after a decision, but a **precedence rule fixed at establishment time** and known in advance. The dispute-protocol question survives as a sub-question below.*
+
+The base specification models delegation as a **chain**: a Relationship, an Authority derived from it, a Task bound to both, with `prior_authority_ref` (§5.5) carrying a summary-level reference to a single predecessor. Every validation rule in §8 operates on the instruments a verifier is handed.
+
+Several real deployment domains are not chain-shaped. In a child-guardianship arrangement under a shared care order, a birth parent's residual parental responsibility, a local authority's statutory parental responsibility, and a carer's delegated day-to-day authority are **simultaneously live over the same subject**, with overlapping and **non-nested** scopes — none is a narrowing of another. Alongside them sits a **standing override held by a party who appears nowhere in the carer's chain**: a social worker who may countermand the birth parent where a safeguarding concern is identified, a Director of Alternative Care who may countermand the carer in the child's best interests, or — where parental responsibility has been fully transferred — a *process* rather than a party, since any change to the bounds requires a court order.
+
+Three things follow that the current model does not express:
+
+1. **Concurrency.** There is no way to state that several Relationships or Authorities are live over one subject, nor to enumerate them. `prior_authority_ref` is singular and describes lineage, not contemporaneity.
+2. **Precedence.** When two validly-issued Authorities speak to the same act, nothing decides which governs. §11.3's deny-overrides-allow and its source ordering resolve conflicts **between constraints within a delegation**; they do not resolve conflicts **between separate delegations** held by different parties.
+3. **Discoverability.** Most consequentially, **nothing obliges a verifier to look for instruments it was not handed.** A verifier presented with a well-formed carer Authority, validating it correctly under §8, and honouring the decision, is conformant to this specification and wrong in the governing arrangement — because the override was never in its field of view. This is a fail-open by omission, and it is the sharpest form of the problem.
+
+The same defect appears from the Constraints side. A care plan's limits are properties **of the subject**, and must hold whoever is currently exercising authority; Constraints as specified (§7) are bound to a Task issued under one Authority, and are therefore **delegation-scoped**. The only expression available today is a Tier 2 `policy_ref` (§7.4) that every issuer touching that subject is trusted to consult — which holds when issuers cooperate and fails silently when one simply does not know to look.
+
+Candidate directions, none adopted:
+
+- A subject-scoped constraint set, discoverable from the subject's identifier, that any Authority over that subject MUST incorporate.
+- A required policy reference carried on every Authority over a subject, naming the governing instrument and the precedence order it establishes.
+- An explicit override relationship on the Authority, naming the party or process that may countermand it, verifiable independently of the chain.
+- Treating precedence entirely as a deployment or trust-framework concern, with the base specification stating only that a verifier MUST establish, from its own configuration, whether concurrent instruments may exist in its domain — the minimum that closes the fail-open.
+
+Interactions to preserve in any resolution: §11.6 (the quorum threshold is itself part of the precedence rule, since a strategic decision requiring agreement across a care team *is* a precedence statement); §8.2 and §12.2 (role-scoped trust anchors — an override authority is a distinct issuing role and must not be collapsed into the Relationship or Authority issuer); and §3.2 (any discovery obligation interacts with conformance level, since L0 packages a whole delegation under one issuer).
+
+#### 11.7.1 A worked candidate: PIP-mediated discovery at the decision point
+
+The direction that currently looks most tractable is not a fifth alternative to the four above but the **mechanism the first two were missing**. Where a deployment already runs a Policy Decision Point (§11.1, Permissioned Capabilities), the governing instruments a verifier was not handed can be retrieved at decision time by a **Policy Information Point** attached to that PDP, and applied as decision inputs alongside the presented delegation.
+
+The shape has precedent. The Mission-Bound Authorization suite's cross-domain profile computes effective authority as the intersection of the verified delegated authority, the **current entitlement of the mapped origin principal**, and current resource and deployment policy — where that middle term is retrieved at the point of use rather than carried in the credential, carries its own declared staleness bound, and fails closed with a distinct denial reason when it cannot be established (§13). Retrieving governing instruments is the same move applied to a different fact.
+
+Its attraction is that it requires **no change to any establishment artifact**: no new claim, no new JWT, no change to the binding chain. Its limits are worth stating precisely, because they determine what still has to be specified:
+
+1. **It supplies the mechanism, not the obligation.** The defect in §11.7 is not that a verifier *cannot* look but that nothing requires it to. A PDP with no such PIP configured still returns a permit and is still conformant. Closing the fail-open therefore still requires an establishment-layer signal that **a governing instrument exists for this subject** — candidate direction (b) above — even if that signal carries nothing about the instrument's content. What PIP mediation changes is how small that signal can be: approximately *an instrument exists, and here is the authority to ask*, rather than the instrument itself. That is a substantially easier thing to standardize.
+2. **A PIP supplies inputs, not precedence.** Which of two validly-issued authorities governs is policy the PDP evaluates, and this specification does not yet provide it. §11.3's ordering (judicial > regulatory > platform > authority > relationship > delegator) was written for conflicts **between constraints within one delegation** and does not discriminate between two holders at the same tier — a birth parent and a carer are both relationship-tier — which is precisely the class of case that motivates this section.
+3. **It is a deployment-profile answer, not a base-specification one.** Permissioned Capabilities is itself deferred (§11.1), and an L0 delegation or a simple agentic deployment may have no PDP to attach a PIP to. Any resolution must still state a minimum rule for profiles that do not deploy one.
+4. **It creates a live availability dependency.** An unreachable PIP MUST fail closed for any decision whose correctness depends on it, with the availability cost that implies. It also removes an option: **"none — bounded by lifetime" (§8.3.1) is not an available status mechanism** for a profile that relies on decision-time retrieval of override state, for the same reason §8.3.1 already excludes it where change arrives from a party other than the issuer.
+5. **The retrieved value must be authenticated governance state, not merely fetched.** A PIP response that can be influenced by the requesting party is an injection surface on the deny path. This implies the governing instrument is itself a signed artifact with an identified issuer and scope — which is to say, an instrument of the kind §4 and §5 already define. PIP mediation does not avoid the establishment layer; it creates demand for one.
+
+**Privacy constraint on PDP placement.** The retrieval is itself a disclosure channel: querying whether governing instruments exist for a subject can reveal the subject's circumstances through the response, and through the query pattern even where the response is a bare boolean, since in most populations the affirmative case is the minority. Under the Privacy-Preserving Profile this makes PDP placement load-bearing rather than an operational detail — a PDP inside a relying party's own trust domain cannot perform this retrieval without importing exactly the context the profile exists to keep out. See `profile/privacy_preserving_profile.md` §3.6, which states the placement rule and follows the pattern its §6.9 already established for admitted-type gating.
+
+**Sub-question retained: disputes and appeals.** A delegatee or an affected third party — including the data subject — may need to challenge a delegation after the fact, which is a different problem from precedence known in advance. That remains undefined here and remains closely related to the Permissioned Capabilities and Protected Access work, since disputes typically operate at the execution layer where capabilities are exercised.
 
 ### 11.8 Cross-Border Recognition
 
 A delegation established under one jurisdiction's legal framework may need to be honored in another jurisdiction. The framework supports this in principle (the Relationship and Authority can be presented across jurisdictions), but the legal recognition rules are out of scope. Trust framework operators are expected to handle cross-border recognition through bilateral or multilateral agreements.
+
+That disposition is unchanged, but as of v4.1 the surrounding landscape is no longer hypothetical, and the section should not read as though it were. The 1996 Hague Convention on Parental Responsibility and Protection of Children already supplies an international definition of parental responsibility explicitly "capable of vesting in actors other than a birth parent," and in March 2026 EU justice ministers agreed a position on cross-border recognition of protective measures and powers of representation for vulnerable adults. Neither is a delegation protocol, and the adult-protection instrument does not automatically extend to minors — but both are working models of how a person's lawful authority is evidenced and recognized across a border, and a trust framework operator implementing this section now has concrete instruments to map onto rather than a blank sheet. See §13 (O'Connell & Curtis, September 2026).
 
 ### 11.9 Objective: Remaining Sub-Questions
 
@@ -1353,6 +1563,18 @@ The commit-boundary principle (§8.3) requires the verifier to consult, at the m
 
 The dividing line is whether the source can change the authorization outcome. This unifies the rulings the specification already makes: the standalone-Objective availability ruling (§8.1 step 8) and the trigger and revocation availability behavior (§7.7, §8.4) are the two sides of this one rule. The consequence is deliberate: because authority-bearing sources fail closed, an attacker who degrades a status source, policy endpoint, or event source converts the attack into denial of service — work stoppage — rather than into unauthorized action. A deployment provisions the availability of these sources accordingly, and where a hard stop on a transient outage is unacceptable for a specific trigger, the softening is the bounded `grace_period_then_revocation` of §7.7, never failing open.
 
+### 12.3.1 Conformance-Level Downgrade
+
+The conformance levels of §3.2.1 differ in which integrity machinery is load-bearing, so a verifier that accepts a lower level than its deployment requires loses exactly the property that level was carrying. Two cases matter.
+
+**Presenting L0 where L1 or L2 is required.** An L0 `delegation+jwt` is signed by one issuer and asserts every component on that issuer's sole authority. If a verifier operating under a profile whose floor is L1 or L2 (§3.2.3) accepts an L0 delegation, it has accepted the delegator's self-assertion of facts the profile requires a third party to have authored — a credentialing body's `source_authority`, a court's constraint, an intermediary's role. This is a **privilege escalation by repackaging**, and it is available to any party who can issue a `delegation+jwt` at all.
+
+A verifier MUST therefore establish the required conformance level from its own configured profile, never from the presented delegation. A delegation below the verifier's floor MUST be rejected. Because the floor is a property of the profile and the profile is verifier-side configuration, this check does not depend on any field an attacker controls.
+
+**Collapsing an L1 or L2 delegation to L0.** §3.2.1 requires that a single-issuer, single-lifetime L1 delegation be mechanically collapsible to L0. That rule is deliberately conditioned on **single issuer and single lifetime**, and both conditions are load-bearing here: collapsing a multi-issuer delegation would re-sign another issuer's assertions under the collapsing party's key, converting third-party evidence into self-assertion while preserving the claim values. An implementation MUST NOT collapse a delegation whose components carry more than one `iss`, and a verifier MUST NOT treat a collapsed delegation as evidence of anything its issuer was not itself competent to assert.
+
+The general form is that **`typ` and issuer identity, not claim shape, carry the trust distinction.** A claim is not more trustworthy for appearing in the same object as claims that were independently authored.
+
 ### 12.4 Cross-Cutting Assumptions
 
 Four assumptions hold across the whole model:
@@ -1403,6 +1625,7 @@ Two residuals are worth naming on their own, because they are the limits most ea
 - **RFC 7519** — Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token (JWT)", May 2015.
 - **RFC 8693** — Jones, M., Nadalin, A., Campbell, B., Bradley, J., and C. Mortimore, "OAuth 2.0 Token Exchange", January 2020.
 - **RFC 9396** — Lodderstedt, T., Richer, J., and B. Campbell, "OAuth 2.0 Rich Authorization Requests", May 2023.
+- **RFC 7662** — Richer, J., Ed., "OAuth 2.0 Token Introspection", October 2015.
 - **OpenID Connect Core 1.0** — Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., and C. Mortimore, November 2014.
 
 ### 13.2 Informative References
@@ -1417,6 +1640,9 @@ Two residuals are worth naming on their own, because they are the limits most ea
 - **ISO 17442-1:2020** — Financial services — Legal entity identifier (LEI).
 - **ISO 5009** — Financial services — Official organizational roles.
 - **GLEIF Registration Authorities List** — Global Legal Entity Identifier Foundation.
+- **O'Connell, R. and A. Curtis** — *The Guardianship Gap: A qualitative analysis of the challenges of guardianship authority in digital ecosystems*, OpenID Foundation, September 2026. Qualitative fieldwork with civil servants, a social care standards authority, a safeguarding commission, and care home managers on how legal guardians exercise oversight online. Its Table 4 (authority holder, scope, and override by care-order type) is the source of the §11.7 reframe; its Table 5 (what a platform receives versus what stays outside it) independently reproduces the Privacy-Preserving Profile's disclosure split. Analysis: `stress-tests/guardianship_authority_fieldwork.md`.
+- **O'Connell, R. and A. Curtis** — *Delegated Authority Policy Framework for Child Rights-Respecting Digital Environments*, OpenID Foundation, April 2026. The policy framework preceding the fieldwork above; source of the six privacy requirements (R1–R6) the Privacy-Preserving Profile answers. Analysis: `stress-tests/child_guardianship.md`.
+- **Hague Convention on Parental Responsibility and Protection of Children** — Hague Conference on Private International Law, 1996. Cited in §11.8 for its definition of parental responsibility as a status capable of vesting in actors other than a birth parent.
 - **Cedar Policy Language** — https://www.cedarpolicy.com/
 - **Open Policy Agent (Rego)** — https://www.openpolicyagent.org/
 - **SPIFFE / SVID** — https://spiffe.io/
